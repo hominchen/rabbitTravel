@@ -1,0 +1,40 @@
+﻿<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>台灣景點探索地圖</title>
+  <link rel="icon" href="static/images/favicon.png" type="image/png">
+  <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+  <main id="viewport" aria-label="台灣景點探索地圖">
+    <div id="world">
+      <img id="map-bg" src="static/images/taiwan_map1.svg" alt="台灣地圖">
+      <div id="scenic-zones-container" aria-hidden="true"></div>
+      <div id="car" aria-label="玩家位置"></div>
+    </div>
+    <aside id="minimap-container" aria-label="小地圖">
+      <img id="minimap-bg" src="static/images/taiwan_map1.svg" alt="">
+      <div id="minimap-pointer"></div>
+    </aside>
+    <section id="instructions">
+      <strong>探索台灣景點</strong><br>
+      使用方向鍵或 W、A、S、D 移動角色。<br>
+      <span id="coord-display">目前座標 - X: 0, Y: 0</span>
+      <label class="switch-container"><input type="checkbox" id="yt-toggle" checked> 靠近景點時顯示影片</label>
+    </section>
+    <div id="custom-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div id="custom-modal">
+        <h2 id="modal-title">發現景點</h2><p id="modal-text">要開啟景點影片嗎？</p>
+        <div class="modal-buttons"><button class="modal-btn btn-cancel" id="modal-cancel" type="button">取消</button><button class="modal-btn btn-confirm" id="modal-confirm" type="button">開啟影片</button></div>
+      </div>
+    </div>
+    <div id="mobile-controls" aria-label="移動控制">
+      <button class="ctrl-btn" id="ctrl-up" type="button" aria-label="向上">▲</button>
+      <div class="ctrl-row"><button class="ctrl-btn" id="ctrl-left" type="button" aria-label="向左">◀</button><button class="ctrl-btn" id="ctrl-down" type="button" aria-label="向下">▼</button><button class="ctrl-btn" id="ctrl-right" type="button" aria-label="向右">▶</button></div>
+    </div>
+  </main>
+  <script src="static/js/game.js"></script>
+</body>
+</html>
