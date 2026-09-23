@@ -9,16 +9,32 @@
   let car = { x: 935, y: 887, direction: 'DOWN' };
   let pressed = new Set(); let activeLocation = null; const triggered = new Set();
   const directions = { DOWN: '0 0', UP: '-70px 0', LEFT: '0 -70px', RIGHT: '-70px -70px' };
+
   function renderLocations() { locations.forEach((location) => { const zone = document.createElement('div'); zone.className = 'scenic-zone'; zone.style.cssText = `width:${location.radius * 2}px;height:${location.radius * 2}px;left:${location.x}px;top:${location.y}px`; const label = document.createElement('div'); label.className = 'scenic-label'; label.textContent = `📍 ${location.name}`; label.style.left = `${location.x}px`; label.style.top = `${location.y}px`; el.zones.append(zone, label); }); }
   function move() { if (pressed.has('arrowup') || pressed.has('w')) { car.y -= WORLD.speed; car.direction = 'UP'; } if (pressed.has('arrowdown') || pressed.has('s')) { car.y += WORLD.speed; car.direction = 'DOWN'; } if (pressed.has('arrowleft') || pressed.has('a')) { car.x -= WORLD.speed; car.direction = 'LEFT'; } if (pressed.has('arrowright') || pressed.has('d')) { car.x += WORLD.speed; car.direction = 'RIGHT'; } car.x = Math.max(0, Math.min(WORLD.width - WORLD.carSize, car.x)); car.y = Math.max(0, Math.min(WORLD.height - WORLD.carSize, car.y)); }
   function updateWorld() { const x = car.x + WORLD.carSize / 2, y = car.y + WORLD.carSize / 2; const left = Math.min(0, Math.max(el.viewport.clientWidth - WORLD.width, el.viewport.clientWidth / 2 - x)); const top = Math.min(0, Math.max(el.viewport.clientHeight - WORLD.height, el.viewport.clientHeight / 2 - y)); el.car.style.left = `${car.x}px`; el.car.style.top = `${car.y}px`; el.car.style.backgroundPosition = directions[car.direction]; el.world.style.left = `${left}px`; el.world.style.top = `${top}px`; el.coordinates.textContent = `目前座標 - X: ${Math.round(x)}, Y: ${Math.round(y)}`; el.pointer.style.left = `${x / WORLD.width * el.minimap.clientWidth}px`; el.pointer.style.top = `${y / WORLD.height * el.minimap.clientHeight}px`; }
   function closeModal() { el.modal.style.display = 'none'; activeLocation = null; }
   function checkLocations() { const x = car.x + WORLD.carSize / 2, y = car.y + WORLD.carSize / 2; locations.forEach((location) => { const distance = Math.hypot(x - location.x, y - location.y); if (distance >= location.radius + 15) triggered.delete(location.name); if (el.enabled.checked && !triggered.has(location.name) && distance < location.radius) { triggered.add(location.name); activeLocation = location; pressed.clear(); el.title.textContent = `發現 ${location.name}`; el.text.textContent = `要開啟 ${location.name} 的 YouTube 影片嗎？`; el.modal.style.display = 'flex'; el.confirm.focus(); } }); }
   function loop() { if (!activeLocation) { move(); checkLocations(); } updateWorld(); requestAnimationFrame(loop); }
+
   window.addEventListener('keydown', (event) => { if (event.key === 'Escape' && activeLocation) { closeModal(); return; } const key = event.key.toLowerCase(); if (['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(key)) { event.preventDefault(); if (!activeLocation) pressed.add(key); } });
   window.addEventListener('keyup', (event) => pressed.delete(event.key.toLowerCase()));
+  
   const controls = { 'ctrl-up': 'arrowup', 'ctrl-down': 'arrowdown', 'ctrl-left': 'arrowleft', 'ctrl-right': 'arrowright' };
   Object.entries(controls).forEach(([id,key]) => { const button = document.querySelector(`#${id}`); ['pointerdown','pointerup','pointercancel','pointerleave'].forEach((name) => button.addEventListener(name, (event) => { event.preventDefault(); if (name === 'pointerdown' && !activeLocation) pressed.add(key); else pressed.delete(key); })); });
-  el.confirm.addEventListener('click', () => { if (activeLocation) window.open(activeLocation.url, '_blank', 'noopener'); closeModal(); }); el.cancel.addEventListener('click', closeModal);
+
+  // 修正：增加彈出視窗攔截防範邏輯
+  el.confirm.addEventListener('click', () => {
+    if (activeLocation) {
+      const win = window.open(activeLocation.url, '_blank');
+      // 若新分頁開啟失敗（被瀏覽器彈出視窗阻擋），則改為直接轉址
+      if (!win || win.closed || typeof win.closed === 'undefined') {
+        window.location.href = activeLocation.url;
+      }
+    }
+    closeModal();
+  });
+  el.cancel.addEventListener('click', closeModal);
+
   renderLocations(); loop();
 })();
